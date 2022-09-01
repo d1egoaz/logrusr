@@ -119,7 +119,14 @@ func (l *logrusr) Error(err error, msg string, keysAndValues ...interface{}) {
 
 	log.
 		WithFields(listToLogrusFields(l.defaultFormatter, keysAndValues...)).
-		WithError(err).
+		// this keeps happening https://github.com/Sirupsen/logrus/issues/137 even after a supposed
+		// fix https://github.com/sirupsen/logrus/commit/0dd045932f30d8291d8434a36702a7c2084821a4
+		// actual issue: https://github.com/golang/go/issues/5161
+		// issue: "error":{}
+		//
+		// workaround is remove WithError(err) and pass err.Error() rather than the raw err
+		WithField("error", err.Error()).
+		// WithError(err).
 		Error(msg)
 }
 
